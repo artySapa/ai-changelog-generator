@@ -2,6 +2,12 @@
 
 An intelligent changelog generator that analyzes Git commits and creates organized, readable changelogs grouped by features and components. The application uses AI to understand commit messages and group related changes together.
 
+Developers can call the functions in the backend to get JSON view of the AI-generated backlogs. 
+
+https://github.com/user-attachments/assets/24fba8fe-d3ba-4711-b84e-304f314fcc60
+
+This video shows the demo of what the project looks like after following all of the steps in the "Setup and Installation" part.
+
 ## Features
 
 - 🤖 AI-powered commit analysis and grouping
