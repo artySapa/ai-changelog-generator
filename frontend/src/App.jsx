@@ -42,16 +42,6 @@ function App() {
         {loading && (
           <div className="card bg-white/80 backdrop-blur-sm">
             <LoadingSpinner />
-            <div className="flex justify-between items-center px-6 py-4 bg-gray-50 rounded-b-lg">
-              <div className="text-sm text-gray-500">
-                Step 1/3: Fetching commits...
-              </div>
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
-              </div>
-            </div>
           </div>
         )}
 
