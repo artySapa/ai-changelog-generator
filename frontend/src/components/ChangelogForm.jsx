@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function ChangelogForm({ onGenerate, loading }) {
+export default function ChangelogForm({ onGenerate, loading, setLoading }) {
   const [repoUrl, setRepoUrl] = useState('');
   const [dateRange, setDateRange] = useState('7'); // days
   const [formError, setFormError] = useState('');
@@ -15,6 +15,7 @@ export default function ChangelogForm({ onGenerate, loading }) {
     }
     
     try {
+      setLoading(true);
       const response = await fetch('http://localhost:3000/api/changelog', {
         method: 'POST',
         headers: {
@@ -35,6 +36,8 @@ export default function ChangelogForm({ onGenerate, loading }) {
       onGenerate(data);
     } catch (error) {
       setFormError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 

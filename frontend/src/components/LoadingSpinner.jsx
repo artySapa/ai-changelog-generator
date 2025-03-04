@@ -1,12 +1,14 @@
+import Loader from './Loader';
+
 export default function LoadingSpinner() {
   return (
-    <div className="flex items-center justify-center p-8">
-      <div className="relative">
-        <div className="w-12 h-12 border-4 border-blue-200 rounded-full"></div>
-        <div className="w-12 h-12 border-4 border-blue-500 rounded-full border-t-transparent animate-spin absolute top-0"></div>
+    <div className="flex flex-col items-center justify-center p-8 space-y-4">
+      <Loader />
+      <div className="text-lg font-medium text-gray-700 animate-pulse">
+        Analyzing commits and generating changelog...
       </div>
-      <div className="ml-4 text-lg font-medium text-gray-700">
-        Generating changelog...
+      <div className="text-sm text-gray-500">
+        This might take a minute for repositories with many commits
       </div>
     </div>
   );

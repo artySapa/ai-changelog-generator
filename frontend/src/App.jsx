@@ -35,12 +35,29 @@ function App() {
 
         {/* Form Section */}
         <div className="card mb-8">
-          <ChangelogForm onGenerate={handleGenerate} loading={loading} />
+          <ChangelogForm onGenerate={handleGenerate} loading={loading} setLoading={setLoading} />
         </div>
 
-        {/* Status Messages */}
+        {/* Loading State */}
+        {loading && (
+          <div className="card bg-white/80 backdrop-blur-sm">
+            <LoadingSpinner />
+            <div className="flex justify-between items-center px-6 py-4 bg-gray-50 rounded-b-lg">
+              <div className="text-sm text-gray-500">
+                Step 1/3: Fetching commits...
+              </div>
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
         {error && (
-          <div className="card bg-red-50 border-l-4 border-red-500 mb-8">
+          <div className="card bg-red-50 border-l-4 border-red-500">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -51,12 +68,6 @@ function App() {
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             </div>
-          </div>
-        )}
-
-        {loading && (
-          <div className="card text-center">
-            <LoadingSpinner />
           </div>
         )}
 
