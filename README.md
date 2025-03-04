@@ -121,21 +121,23 @@ An intelligent changelog generator that analyzes Git commits and creates organiz
    ```
 
 ## Code Organization
+```
 frontend/
 ├── src/
-│ ├── components/
-│ │ ├── ChangelogDisplay.jsx # Displays formatted changelog
-│ │ ├── ChangelogForm.jsx # Input form component
-│ │ ├── LoadingSpinner.jsx # Loading state component
-│ │ └── Loader.jsx # Animated loader
-│ ├── App.jsx # Main application component
-│ └── index.css # Global styles
+│   ├── components/
+│   │   ├── ChangelogDisplay.jsx # Displays formatted changelog
+│   │   ├── ChangelogForm.jsx # Input form component
+│   │   ├── LoadingSpinner.jsx # Loading state component
+│   │   └── Loader.jsx # Animated loader
+│   ├── App.jsx # Main application component
+│   └── index.css # Global styles
+
 backend/
 ├── src/
-│ ├── routes/
-│ │ └── changelog.js # Changelog generation endpoint
-│ └── index.js # Server setup
-
+│   ├── routes/
+│   │   └── changelog.js # Changelog generation endpoint
+│   └── index.js # Server setup
+```
 
 ## Future Improvements
 
