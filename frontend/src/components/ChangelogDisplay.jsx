@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 export default function ChangelogDisplay({ changelog, commits }) {
   const [activeCategory, setActiveCategory] = useState('all');
   
-  // Parse the markdown content into sections
+  // Parse the markdown content into sections with grouped commits
   const sections = useMemo(() => {
     const content = changelog || '';
     const categories = {
@@ -16,40 +16,56 @@ export default function ChangelogDisplay({ changelog, commits }) {
     };
     
     let currentCategory = 'other';
-    let currentItem = '';
+    let currentChange = null;
     
     content.split('\n').forEach(line => {
-      // Check for category headers first
+      // Check for category headers
       if (line.match(/^#+\s*(🚀|🐛|🔧|📚)/)) {
-        if (currentItem) {
-          categories[currentCategory].push(currentItem.trim());
-          currentItem = '';
+        if (currentChange) {
+          categories[currentCategory].push(currentChange);
+          currentChange = null;
         }
         if (line.includes('🚀')) currentCategory = '🚀 Features';
         else if (line.includes('🐛')) currentCategory = '🐛 Bug Fixes';
         else if (line.includes('🔧')) currentCategory = '🔧 Maintenance';
         else if (line.includes('📚')) currentCategory = '📚 Documentation';
       }
-      // Check for list items
+      // New change item
       else if (line.startsWith('- ')) {
-        if (currentItem) {
-          categories[currentCategory].push(currentItem.trim());
+        if (currentChange) {
+          categories[currentCategory].push(currentChange);
         }
-        currentItem = line;
+        currentChange = {
+          summary: line,
+          details: [],
+          commits: [],
+          files: []
+        };
       }
-      // Append to current item
-      else if (currentItem) {
-        currentItem += '\n' + line;
+      // Related commits section
+      else if (line.startsWith('  Related commits:')) {
+        if (currentChange) {
+          currentChange.showingCommits = true;
+        }
       }
-      // Start new item if we have content but no current item
-      else if (line.trim()) {
-        currentItem = line;
+      // Commit message
+      else if (line.startsWith('  > ') && currentChange?.showingCommits) {
+        currentChange.commits.push(line.substring(4));
+      }
+      // Files affected (in parentheses)
+      else if (line.match(/\(.*\)/) && currentChange) {
+        const files = line.match(/\((.*)\)/)[1];
+        currentChange.files = files.split(', ');
+      }
+      // Additional details
+      else if (line.startsWith('  ') && currentChange) {
+        currentChange.details.push(line.trim());
       }
     });
     
-    // Add last item
-    if (currentItem) {
-      categories[currentCategory].push(currentItem.trim());
+    // Add last change
+    if (currentChange) {
+      categories[currentCategory].push(currentChange);
     }
     
     return categories;
@@ -63,16 +79,15 @@ export default function ChangelogDisplay({ changelog, commits }) {
     { id: '📚 Documentation', label: 'Documentation', icon: '📚' }
   ];
 
-  // Get filtered items based on active category
   const filteredItems = useMemo(() => {
     if (activeCategory === 'all') {
       return Object.entries(sections).flatMap(([category, items]) => 
-        items.map(item => ({ category, content: item }))
+        items.map(item => ({ category, ...item }))
       );
     }
     return sections[activeCategory].map(item => ({
       category: activeCategory,
-      content: item
+      ...item
     }));
   }, [sections, activeCategory]);
 
@@ -101,32 +116,75 @@ export default function ChangelogDisplay({ changelog, commits }) {
       </div>
 
       {/* Changelog Content */}
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {filteredItems.map((item, index) => (
           <div 
             key={index}
-            className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-200"
+            className="bg-white rounded-lg shadow-md overflow-hidden"
           >
-            <div className="prose prose-blue max-w-none">
-              <ReactMarkdown>{item.content}</ReactMarkdown>
+            {/* Change Summary */}
+            <div className="p-4">
+              <div className="prose prose-blue max-w-none">
+                <ReactMarkdown>{item.summary}</ReactMarkdown>
+              </div>
+              
+              {/* Details */}
+              {item.details.length > 0 && (
+                <div className="mt-2 text-gray-600">
+                  {item.details.map((detail, i) => (
+                    <div key={i} className="ml-4">• {detail}</div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="mt-2 pt-2 border-t border-gray-100">
-              <span className="inline-block px-2 py-1 text-sm text-gray-600 bg-gray-100 rounded">
-                {item.category}
-              </span>
+
+            {/* Files and Commits */}
+            <div className="bg-gray-50 p-4 border-t border-gray-100">
+              {/* Files */}
+              {item.files.length > 0 && (
+                <div className="mb-2">
+                  <div className="text-sm font-medium text-gray-500 mb-1">Modified files:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {item.files.map((file, i) => (
+                      <span key={i} className="text-xs bg-white px-2 py-1 rounded border">
+                        {file}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Commits */}
+              {item.commits.length > 0 && (
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-1">Related commits:</div>
+                  <div className="space-y-1">
+                    {item.commits.map((commit, i) => (
+                      <div key={i} className="text-xs bg-white px-2 py-1 rounded border">
+                        {commit}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Category Tag */}
+              <div className="mt-3">
+                <span className="inline-block px-2 py-1 text-xs text-gray-600 bg-gray-200 rounded">
+                  {item.category}
+                </span>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Empty State */}
       {filteredItems.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           No changes found in this category
         </div>
       )}
 
-      {/* Commit Count */}
       <div className="text-sm text-gray-500 text-right">
         Based on {commits} commits
       </div>
