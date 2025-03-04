@@ -4,7 +4,6 @@ import ReactMarkdown from 'react-markdown';
 export default function ChangelogDisplay({ changelog, commits }) {
   const [activeCategory, setActiveCategory] = useState('all');
   
-  // Parse the markdown content into sections with grouped commits
   const sections = useMemo(() => {
     const content = changelog || '';
     const categories = {
@@ -36,10 +35,9 @@ export default function ChangelogDisplay({ changelog, commits }) {
           categories[currentCategory].push(currentChange);
         }
         currentChange = {
-          summary: line,
+          summary: line.substring(2), // Remove "- " prefix
           details: [],
-          commits: [],
-          files: []
+          commits: []
         };
       }
       // Related commits section
@@ -52,18 +50,12 @@ export default function ChangelogDisplay({ changelog, commits }) {
       else if (line.startsWith('  > ') && currentChange?.showingCommits) {
         currentChange.commits.push(line.substring(4));
       }
-      // Files affected (in parentheses)
-      else if (line.match(/\(.*\)/) && currentChange) {
-        const files = line.match(/\((.*)\)/)[1];
-        currentChange.files = files.split(', ');
-      }
       // Additional details
-      else if (line.startsWith('  ') && currentChange) {
+      else if (line.startsWith('  ') && currentChange && !currentChange.showingCommits) {
         currentChange.details.push(line.trim());
       }
     });
     
-    // Add last change
     if (currentChange) {
       categories[currentCategory].push(currentChange);
     }
@@ -116,64 +108,52 @@ export default function ChangelogDisplay({ changelog, commits }) {
       </div>
 
       {/* Changelog Content */}
-      <div className="grid gap-6">
+      <div className="grid gap-4">
         {filteredItems.map((item, index) => (
           <div 
             key={index}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200"
           >
-            {/* Change Summary */}
-            <div className="p-4">
-              <div className="prose prose-blue max-w-none">
-                <ReactMarkdown>{item.summary}</ReactMarkdown>
-              </div>
+            {/* Change Summary and Details */}
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {item.summary}
+              </h3>
               
-              {/* Details */}
               {item.details.length > 0 && (
-                <div className="mt-2 text-gray-600">
+                <div className="mt-3 space-y-2 text-gray-600">
                   {item.details.map((detail, i) => (
-                    <div key={i} className="ml-4">• {detail}</div>
+                    <div key={i} className="flex items-start">
+                      <span className="text-blue-500 mr-2">•</span>
+                      <span>{detail}</span>
+                    </div>
                   ))}
                 </div>
               )}
-            </div>
 
-            {/* Files and Commits */}
-            <div className="bg-gray-50 p-4 border-t border-gray-100">
-              {/* Files */}
-              {item.files.length > 0 && (
-                <div className="mb-2">
-                  <div className="text-sm font-medium text-gray-500 mb-1">Modified files:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {item.files.map((file, i) => (
-                      <span key={i} className="text-xs bg-white px-2 py-1 rounded border">
-                        {file}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Commits */}
+              {/* Related Commits */}
               {item.commits.length > 0 && (
-                <div>
-                  <div className="text-sm font-medium text-gray-500 mb-1">Related commits:</div>
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="text-sm font-medium text-gray-500 mb-2">Related commits:</div>
                   <div className="space-y-1">
                     {item.commits.map((commit, i) => (
-                      <div key={i} className="text-xs bg-white px-2 py-1 rounded border">
+                      <div 
+                        key={i} 
+                        className="text-sm bg-gray-50 px-3 py-1.5 rounded-md text-gray-700 font-mono"
+                      >
                         {commit}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              
-              {/* Category Tag */}
-              <div className="mt-3">
-                <span className="inline-block px-2 py-1 text-xs text-gray-600 bg-gray-200 rounded">
-                  {item.category}
-                </span>
-              </div>
+            </div>
+
+            {/* Category Tag */}
+            <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                {item.category}
+              </span>
             </div>
           </div>
         ))}
